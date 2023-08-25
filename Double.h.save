@@ -1,0 +1,20 @@
+#ifndef DOUBLE_H_INCLUDED
+#define DOUBLE_H_INCLUDED
+
+/**
+ * Сравнивает числа a и b типа double.
+ * Возвращает -1, если a < b, 0, если a = b, и 1, если a > b.
+ * @param[in] a, b Сравниваемые числа
+ */
+int compare_double(double a, double b);
+
+
+/**
+ * Проверяет, равно ли полученное число типа double нулю.
+ * Возвращает true, если да, и false, если нет.
+ * @param[in] n
+ * @returns is_zero
+ */
+bool is_zero(double n);
+
+#endif // DOUBLE_H_INCLUDED

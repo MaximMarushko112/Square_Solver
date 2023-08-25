@@ -1,0 +1,212 @@
+#include <assert.h>
+#include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+
+const double EPS = 1e-6;
+const int SS_INF_ROOTS = -1;
+const int NUM_OF_COEFS = 3; //?type
+
+struct SquareTrinomial
+{
+    double a = 0;
+    double b = 0;
+    double c = 0;
+};
+
+enum Errors
+{
+    ER_COMP_DB = -2000,
+    ER_DURAK
+};
+
+int solve_square_equation(struct SquareTrinomial eq, double* x1, double* x2);
+
+int compare_double(double a, double b);
+
+int line(double k, double b, double* x1, double* x2);
+
+int square(struct SquareTrinomial eq, double* x1, double* x2);
+
+void print_result(int result, double root1, double root2);
+
+int get_coef(double* n);
+
+void hello_ded();
+
+int input_coefs(double coefs[]);
+
+int main() {
+    double coefs[NUM_OF_COEFS] = {};   
+
+    hello_ded(); 
+
+    while (input_coefs(coefs))
+        ;
+
+    struct SquareTrinomial eq = {};    
+    eq.a = coefs[0];
+    eq.b = coefs[1];
+    eq.c = coefs[2];
+    double root1 = 0;
+    double root2 = 0;
+    int result = solve_square_equation(eq, &root1, &root2);  
+
+    print_result(result, root1, root2);
+}
+
+void hello_ded(){
+    printf("# Square_Solver v1.2\n"
+           "# directed by Maxim\n\n");
+}
+
+int solve_square_equation(struct SquareTrinomial eq, double* x1, double* x2) {
+    assert(isfinite(eq.a));
+    assert(isfinite(eq.b));
+    assert(isfinite(eq.c));
+
+    assert(x1 != NULL);
+    assert(x2 != NULL);
+    assert(x1 != x2);
+
+    return (compare_double(eq.a, 0) == 0) ? line(eq.b, eq.c, x1, x2) : square(eq, x1, x2);
+}
+
+int compare_double(double a, double b) {
+    assert(isfinite(a));
+    assert(isfinite(b));
+
+    if (fabs(a - b) < EPS)
+        return 0;
+    return (a < b) ? -1 : 1;
+}
+
+int line(double k, double b, double* x1, double* x2) {
+    assert(isfinite(k));
+    assert(isfinite(b));
+
+    assert(x1 != NULL);
+    assert(x2 != NULL);
+    assert(x1 != x2);
+
+    if (compare_double(k, 0) == 0) {
+        if (compare_double(b, 0) == 0) {
+            return SS_INF_ROOTS;
+        }
+        else {
+            return 0;
+        }
+    }
+    else {
+        *x1 = -b / k;
+        *x2 = *x1;
+        return 1;
+    }
+}
+
+int square(struct SquareTrinomial eq, double* x1, double* x2) {
+    assert(isfinite(eq.a));
+    assert(isfinite(eq.b));
+    assert(isfinite(eq.c));
+
+    assert(x1 != NULL);
+    assert(x2 != NULL);
+    assert(x1 != x2);
+
+    double disc = eq.b * eq.b - 4 * eq.a * eq.c;
+    switch (compare_double(disc, 0)) {
+    case -1:
+        return 0;
+    case 0: {
+        *x1 = -eq.b / (2 * eq.a);
+        *x2 = *x1;
+        return 1;
+    }
+    case 1: {
+        disc = sqrt(disc);
+        *x1 = (-eq.b - disc) / (2 * eq.a);
+        *x2 = (-eq.b + disc) / (2 * eq.a);
+        return 2;
+    }
+    default:
+        return ER_COMP_DB;
+    }
+}
+
+void print_result(int result, double root1, double root2) {
+    assert(isfinite(result));
+    assert(isfinite(root1));
+    assert(isfinite(root2));
+
+    switch (result) {
+    case SS_INF_ROOTS:
+        printf("(-inf; +inf)\n");
+        break;
+    case 0:
+        printf("NULL\n");
+        break;
+    case 1:
+        printf("x = %lf\n", root1);
+        break;
+    case 2:
+        printf("x1 = %lf\nx2 = %lf\n", root1, root2);
+        break;
+    default:
+        printf("result error");
+    }
+}
+
+/*int get_coef(double* n) {       // переназвать, комменты к непонятным местам
+    assert(n != NULL);
+
+    int symbol = 0, sign = 0, power = 1;
+    double x = 0;
+    while (isspace(symbol = getchar()))          // удаляем пустые символы
+        ;
+    sign = (symbol == '-') ? -1 : 1;             // определяем знак числа
+    if (symbol == '-' || symbol == '+')
+        symbol = getchar();
+    while (isdigit(symbol)) {                    // целая часть числа
+        x = x * 10 + symbol - '0';
+        symbol = getchar();
+    }
+    if (isspace(symbol)) {                       // принимаем целое число
+        *n = x * sign;
+        return 0;
+    }
+    else if (symbol == '.' || symbol == ',') {   // принимаем дробное число
+        while (isdigit(symbol = getchar())) {
+        x = x * 10 + symbol - '0';
+        power *= 10;
+        }
+        if (power == 1 || !isspace(symbol))
+            return ER_DURAK;
+        else {
+            *n = sign * x / power;
+            return 0;
+        }
+    }
+    else
+        return ER_DURAK;
+}*/
+
+int get_coef(double* n) {
+    if (scanf("%lf", n))
+        return 0;
+    return ER_DURAK;
+}
+
+int input_coefs(double* coefs) {
+    int flag = 0, i = 0;
+    printf("Enter coefficients a, b, c: ");
+    for (i = 0; i < NUM_OF_COEFS; i++) {
+        flag = get_coef(&coefs[i]);
+    }
+    while (getchar() != '\n')        //func 
+        ;
+    if (flag == ER_DURAK) {
+        printf("DURAK\n");
+        return 1;
+    }
+    return 0;
+}
